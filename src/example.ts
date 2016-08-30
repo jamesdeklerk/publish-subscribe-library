@@ -79,7 +79,7 @@ publisher.publish(`A`);
  * Publishing an event after 1000 milliseconds.
  */
 setTimeout(function () {
-    publisher.publish(`C`, `This event was published after 1000 milliseconds.`);
+    publisher.publish(`C`, `This event was published after 1000 milliseconds!`);
 }, 1000);
 
 // -------------------------------------------------------

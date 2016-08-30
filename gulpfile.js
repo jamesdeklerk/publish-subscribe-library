@@ -4,7 +4,10 @@
 var browsersync = require('browser-sync'),
     reload = browsersync.reload,
     gulp = require('gulp'),
+    plumber = require('gulp-plumber'),
+    rename = require('gulp-rename'),
     typescript = require('gulp-typescript'),
+    uglify = require('gulp-uglify'),
     // Using tsconfig.json
     typescriptProject = typescript.createProject('tsconfig.json'),
     // Directories
@@ -15,7 +18,6 @@ var browsersync = require('browser-sync'),
     cssDirectory = buildDirectory + 'css/',
     javascriptDirectory = buildDirectory + 'javascript/';
 // -------------------------------------------------------
-
 
 
 // =======================================================
@@ -35,10 +37,41 @@ gulp.task('recompile:watch', function () {
 });
 
 // Recompile task - recompiles all files
-gulp.task('recompile', ['recompile:typescript']);
+gulp.task('recompile', [
+    'recompile:typescript'
+]);
 
 // -------------------------------------------------------
 
+
+// =======================================================
+// Minify tasks
+// =======================================================
+
+// Minify JavaScript
+gulp.task('minify:javascript', function () {
+    gulp.src([javascriptDirectory + '**/*.js', '!' + javascriptDirectory + '**/*.min.js']) // grab all .js files (ignoring all .min.js files) and pipe them to a destination
+        .pipe(plumber()) // make sure gulp doesn't break when there are errors
+        .pipe(rename({
+            suffix: '.min'
+        }))
+        .pipe(uglify())
+        .pipe(gulp.dest(function (file) {
+            return file.base;
+        }));
+});
+
+// Minify watch task - watches for files to minify
+gulp.task('minify:watch', function () {
+    gulp.watch([javascriptDirectory + '**/*.js', '!' + javascriptDirectory + '**/*.min.js'], ['minify:javascript']);
+});
+
+// Minify task - minify all files
+gulp.task('minify', [
+    'minify:javascript'
+]);
+
+// -------------------------------------------------------
 
 
 // =======================================================
@@ -72,7 +105,7 @@ gulp.task('reload:css', function () {
 
 // Reload JavaScript
 gulp.task('reload:javascript', function () {
-    gulp.src(javascriptDirectory + '**/*.js')
+    gulp.src([javascriptDirectory + '**/*.js', '!' + javascriptDirectory + '**/*.min.js'])
         .pipe(reload({
             stream: true
         }));
@@ -82,18 +115,31 @@ gulp.task('reload:javascript', function () {
 gulp.task('reload:watch', function () {
     gulp.watch(htmlDirectory + '**/*.html', ['reload:html']);
     gulp.watch(cssDirectory + '**/*.css', ['reload:css']);
-    gulp.watch(javascriptDirectory + '**/*.js', ['reload:javascript']);
+    gulp.watch([javascriptDirectory + '**/*.js', '!' + javascriptDirectory + '**/*.min.js'], ['reload:javascript']);
 });
 
 // Reload task - starts Browsersync & reloads all files
-gulp.task('reload', ['browsersync', 'reload:html', 'reload:css', 'reload:javascript']);
+gulp.task('reload', [
+    'browsersync',
+    'reload:html',
+    'reload:css',
+    'reload:javascript'
+]);
 
 // -------------------------------------------------------
-
 
 
 // =======================================================
 // Default task - starts all others
 // =======================================================
-gulp.task('default', ['recompile', 'recompile:watch', 'reload', 'reload:watch']);
+
+gulp.task('default', [
+    'recompile',
+    'recompile:watch',
+    'minify',
+    'minify:watch',
+    'reload',
+    'reload:watch'
+]);
+
 // -------------------------------------------------------
