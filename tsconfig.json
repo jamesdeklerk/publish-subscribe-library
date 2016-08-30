@@ -1,0 +1,25 @@
+{
+    "compilerOptions": {
+        "rootDir": "src/",
+        "noImplicitAny": true,
+        "removeComments": true,
+        "sourceMap": true,
+        //"outFile": "publish-subscribe-library.js",
+        "target": "es5"
+    },
+    // This specifies the files and order to compile the files in.
+    "files": [
+        "src/publish-subscribe-library.ts",
+        "src/example.ts"
+    ],
+    "exclude": [
+        ".git",
+        ".vscode",
+        "bower_components",
+        "build",
+        "node_modules",
+        "src/elements",
+        "src/images",
+        "src/scss"
+    ]
+}
