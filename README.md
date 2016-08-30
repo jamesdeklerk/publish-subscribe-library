@@ -1,3 +1,7 @@
+## Publish-subscribe-library
+
+Topic-based publish-subscribe library.
+
 ## Code Example
 
 **TypeScript Example**<br />

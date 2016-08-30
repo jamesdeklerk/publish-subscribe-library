@@ -1,4 +1,28 @@
 // =======================================================
+// Registering events
+// =======================================================
+publisher.register("A", [], "Just a plain event.", this);
+publisher.register("B", [
+    {
+        description: "",
+        name: "x",
+        type: "number",
+    },
+    {
+        description: "",
+        name: "y",
+        type: "number",
+    },
+], "An event with two parameters.", this);
+publisher.register("C", [
+    {
+        description: "",
+        name: "text",
+        type: "string",
+    },
+], "An event with one parameter.", this);
+// -------------------------------------------------------
+// =======================================================
 // Subscribing to events
 // =======================================================
 /**
