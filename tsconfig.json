@@ -2,7 +2,7 @@
     "compilerOptions": {
         "rootDir": "src/",
         "noImplicitAny": true,
-        "removeComments": true,
+        //"removeComments": true,
         "sourceMap": true,
         //"outFile": "publish-subscribe-library.js",
         "target": "es5"

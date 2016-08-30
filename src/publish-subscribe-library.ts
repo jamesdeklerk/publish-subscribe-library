@@ -14,11 +14,11 @@ class Publisher {
      * Key: The events name
      * Value: An array of handlers subscribed to that event.
      * e.g. events = {
-     *     "event1": [
+     *     `event1`: [
      *         function () {},
      *         function () {}
      *     ],
-     *     "event2": [
+     *     `event2`: [
      *         function () {}
      *     ]
      * }
@@ -34,7 +34,7 @@ class Publisher {
      */
     public subscribe(event: string, handler: Function): Function {
         if (handler === undefined) {
-            throw new Error("Expected an event handler");
+            throw new Error(`Expected an event handler`);
         }
 
         // If the event doesn't exist, create an array for the events
@@ -55,7 +55,7 @@ class Publisher {
     // The unsubscribe method uses method overloading.
     // @see http://stackoverflow.com/questions/12688275/method-overloading
     /**
-     * Deletes the event.
+     * Deletes the event (i.e. removes all event handlers from an event).
      * 
      * @param event The name of the event.
      * @return True if successfully unsubscribed, false if not.
@@ -74,7 +74,7 @@ class Publisher {
 
         // First check the event exists
         if (event === undefined) {
-            throw new Error("Expected an event to unsubscribe");
+            throw new Error(`Expected an event to unsubscribe`);
         }
 
         // If the event doesn't exist, return
@@ -115,7 +115,7 @@ class Publisher {
     public publish(event: string, ...args: any[]): boolean {
 
         if (event === undefined) {
-            throw new Error("Expected an event to publish");
+            throw new Error(`Expected an event to publish`);
         }
 
         // If the event doesn't exist, return false
