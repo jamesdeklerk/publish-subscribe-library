@@ -1,3 +1,12 @@
+var PublisherEvent = (function () {
+    function PublisherEvent(eventName, parameters, description, registrant) {
+        this.name = eventName;
+        this.parameters = parameters;
+        this.description = description;
+        this.registrant = registrant;
+    }
+    return PublisherEvent;
+}());
 /**
  * Publish–subscribe library
  * Uses the publish–subscribe pattern @see https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern

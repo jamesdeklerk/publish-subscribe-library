@@ -1,3 +1,56 @@
+class PublisherEvent {
+    /**
+     * A description of the event.
+     */
+    public description: string;
+    /**
+     * An array of handlers.
+     */
+    public handlers: Function[];
+    /**
+     * The name of the event.
+     */
+    public name: string;
+    /**
+     * The parameters passed through to the event handlers.
+     * An ordered array of parameter objects containing each parameters information
+     * i.e. name, description and type.
+     * A type can be "boolean", "number", "string", "symbol", "function" or "object".
+     * 
+     * e.g.
+     * // If an event handler looks like this:
+     * function handler(firstName: string, surnameName: string) {
+     *     console.log(`Hello ${firstName} ${surnameName}!`);
+     * }
+     * // The event handlers parameters should be defined as follows:
+     * [
+     *     {
+     *         description: `The person's first name.`,
+     *         name: `firstName`,
+     *         type: `string`
+     *     },
+     *     {
+     *         description: `The person's surname name.`,
+     *         name: `surnameName`,
+     *         type: `string`
+     *     }
+     * ]
+     */
+    public parameters: any[];
+    /**
+     * The object that registered the event.
+     */
+    public registrant: any;
+
+    constructor(eventName: string, parameters?: any[], description?: string, registrant?: any) {
+        this.name = eventName;
+        this.parameters = parameters;
+        this.description = description;
+        this.registrant = registrant;
+    }
+
+}
+
 interface IEvent {
     /**
      * A description of the event.
@@ -17,11 +70,22 @@ interface IEvent {
      * i.e. name, description and type.
      * A type can be "boolean", "number", "string", "symbol", "function" or "object".
      * 
-     * e.g. [
+     * e.g.
+     * // If an event handler looks like this:
+     * function handler(firstName: string, surnameName: string) {
+     *     console.log(`Hello ${firstName} ${surnameName}!`);
+     * }
+     * // The event handlers parameters should be defined as follows:
+     * [
      *     {
-     *         description: ``,
-     *         name: `y`,
-     *         type: `number`,
+     *         description: `The person's first name.`,
+     *         name: `firstName`,
+     *         type: `string`
+     *     },
+     *     {
+     *         description: `The person's surname name.`,
+     *         name: `surnameName`,
+     *         type: `string`
      *     }
      * ]
      */

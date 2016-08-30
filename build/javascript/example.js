@@ -93,3 +93,9 @@ setTimeout(function () {
     publisher.publish("C", "This event was published after 1000 milliseconds!");
 }, 1000);
 // -------------------------------------------------------
+// =======================================================
+// Getting events details
+// =======================================================
+console.log(publisher.getEvent("B"));
+console.log(publisher.getAllEvents());
+// -------------------------------------------------------
