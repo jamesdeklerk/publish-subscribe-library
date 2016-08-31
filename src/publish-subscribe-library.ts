@@ -1,75 +1,98 @@
-class PublisherEvent {
+class ParameterDefinition {
     /**
-     * A description of the event.
+     * An array of the valid JavaScript data types.
      */
-    public description: string;
-    /**
-     * An array of handlers.
-     */
-    public handlers: Function[];
-    /**
-     * The name of the event.
-     */
+    private validTypes: string[] = [`boolean`, `number`, `string`, `symbol`, `function`, `object`];
     public name: string;
-    /**
-     * The parameters passed through to the event handlers.
-     * An ordered array of parameter objects containing each parameters information
-     * i.e. name, description and type.
-     * A type can be "boolean", "number", "string", "symbol", "function" or "object".
-     * 
-     * e.g.
-     * // If an event handler looks like this:
-     * function handler(firstName: string, surnameName: string) {
-     *     console.log(`Hello ${firstName} ${surnameName}!`);
-     * }
-     * // The event handlers parameters should be defined as follows:
-     * [
-     *     {
-     *         description: `The person's first name.`,
-     *         name: `firstName`,
-     *         type: `string`
-     *     },
-     *     {
-     *         description: `The person's surname name.`,
-     *         name: `surnameName`,
-     *         type: `string`
-     *     }
-     * ]
-     */
-    public parameters: any[];
-    /**
-     * The object that registered the event.
-     */
-    public registrant: any;
+    public type: string;
+    public optional: boolean;
+    public description: string;
 
-    constructor(eventName: string, parameters?: any[], description?: string, registrant?: any) {
-        this.name = eventName;
-        this.parameters = parameters;
-        this.description = description;
-        this.registrant = registrant;
+    /**
+     * Creates a new ParameterDefinition.
+     * It also makes sure it's a valid ParameterDefinition.
+     * 
+     * @param name The name of the parameter.
+     * @param type The type of the parameter. It must be a valid JavaScript data type @see validTypes.
+     * @param optional Specifies if the parameter is optional. If optional is not defined it defaults to false.
+     * @param description A description of the parameter.
+     */
+    constructor(name: string, type: string, optional?: boolean, description?: string) {
+        this.name = name;
+        this.type = type;
+        if (optional) {
+            this.optional = true;
+        } else {
+            this.optional = false;
+        }
+        this.description = description || ``;
+
+        // Make sure this is a valid parameter definition.
+        this.performValidParameterDefinitionCheck(this);
     }
 
+    /**
+     * Checks is a given type is a valid type.
+     * 
+     * @param type The type to check.
+     * @return True if the type is valid, false if not.
+     */
+    private validType(type: string): boolean {
+        for (let validType of this.validTypes) {
+            if (type === validType) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Checks is a given parameter definition is valid.
+     */
+    private performValidParameterDefinitionCheck(parameter: ParameterDefinition): void {
+
+        // Check that name is a string and it has at least 1 character.
+        if (typeof parameter.name !== `string` || parameter.name.length <= 0) {
+            throw new Error(`Expected the parameter name to be a string with at least 1 character.`);
+        }
+
+        // Check that optional is a boolean.
+        if (typeof parameter.optional !== `boolean`) {
+            throw new Error(`Expected optional of parameter ${parameter.name} to be a boolean.`);
+        }
+
+        // Check the parameter type is valid.
+        if (!this.validType(parameter.type)) {
+            throw new Error(`The type "${parameter.type}" of parameter ${parameter.name} is not ` +
+                `a valid JavaScript type. Expected type to be "boolean" or "number" or "string" etc.\n` +
+                `Note: Arrays and instantiations of custom classes have type "object", ` +
+                `and classes have type "function".`);
+        }
+
+        // Check that description is a string.
+        if (typeof parameter.description !== `string`) {
+            throw new Error(`Expected description of parameter ${parameter.name} to be a string.`);
+        }
+    }
 }
 
-interface IEvent {
+class PublisherEvent {
+    public name: string;
+    public parameters: ParameterDefinition[];
+    public description: string;
+    public registrant: any;
     /**
-     * A description of the event.
+     * An array of the event handlers associated with this event.
      */
-    description?: string;
+    public handlers: Function[] = [];
+
     /**
-     * An array of handlers.
-     */
-    handlers?: Function[];
-    /**
-     * The name of the event.
-     */
-    name: string;
-    /**
-     * The parameters passed through to the event handlers.
-     * An ordered array of parameter objects containing each parameters information
-     * i.e. name, description and type.
-     * A type can be "boolean", "number", "string", "symbol", "function" or "object".
+     * Creates a new PublisherEvent.
      * 
+     * @param eventName The name of the event.
+     * @param parameters An array of ParameterDefinition objects. This defines each 
+     * of the parameters passed through when an event handler is fired.
      * e.g.
      * // If an event handler looks like this:
      * function handler(firstName: string, surnameName: string) {
@@ -78,22 +101,143 @@ interface IEvent {
      * // The event handlers parameters should be defined as follows:
      * [
      *     {
-     *         description: `The person's first name.`,
-     *         name: `firstName`,
-     *         type: `string`
+     *         description: "The person's first name.",
+     *         name: "firstName",
+     *         type: "string",
+     *         optional: false
      *     },
      *     {
-     *         description: `The person's surname name.`,
-     *         name: `surnameName`,
-     *         type: `string`
+     *         description: "The person's surname name.",
+     *         name: "surnameName",
+     *         type: "string",
+     *         optional: true
      *     }
      * ]
+     * @param description A description of the event.
+     * @param registrant The object that registered the event.
      */
-    parameters: any[];
+    constructor(eventName: string, parameters?: any[], description?: string, registrant?: any) {
+
+        this.name = eventName;
+        this.description = description || ``;
+        this.registrant = registrant;
+
+        this.parameters = parameters || [];
+        // If this.parameters is not a ParameterDefinition array, try convert it to one.
+        if (!this.validParameterDefinitionArray(parameters)) {
+            this.parameters = this.convertToParameterDefinitionArray(this.parameters)
+        }
+
+        // Make sure this is a valid publisher event.
+        this.performValidPublisherEventCheck(this);
+    }
+
     /**
-     * The object that registered the event.
+     * Converts parameters to a ParameterDefinition array.
+     * 
+     * @param parameters The ParameterDefinition array to check.
+     * @return A ParameterDefinition array, else false.
      */
-    registrant?: any;
+    private convertToParameterDefinitionArray(parameters: ParameterDefinition[]): ParameterDefinition[] {
+
+        // Check that parameters is an array.
+        if (parameters instanceof Array) {
+            // If it is an array, try convert each item into a ParameterDefinition
+            // tslint:disable-next-line
+            for (let i = 0, parameter: any; parameter = parameters[i]; i = i + 1) {
+
+                // Check that parameter is an object of some kind.
+                if (typeof parameter !== `object`) {
+                    throw new Error(`Unexpected parameter definition.`);
+                }
+
+                parameters[i] = new ParameterDefinition(parameter.name, parameter.type,
+                    parameter.optional, parameter.description);
+            }
+        } else {
+            throw new Error(`Expected parameters to be an array of parameter definitions (the array can be empty).`);
+        }
+
+        return parameters;
+    }
+
+    /**
+     * Checks is the given parameters are in a valid order.
+     * A required parameter cannot follow an optional parameter.
+     * 
+     * @param parameters The ParameterDefinition array to check.
+     * @return True if it is a valid parameter order, else false.
+     */
+    private validParameterOrder(parameters: ParameterDefinition[]): boolean {
+        let optionalParameterFound = false;
+
+        for (let parameter of parameters) {
+            if (parameter.optional) {
+                optionalParameterFound = true;
+            }
+
+            // If an optional parameter was found and a required parameter 
+            // was found after the optional parameter was found,
+            // then it is not a valid parameter order.
+            if (optionalParameterFound && !parameter.optional) {
+                return false;
+            }
+        }
+
+        // If it gets here, no required parameters were found following an optional parameter.
+        // Hence, it is a valid parameter order.
+        return true;
+    }
+
+    /**
+     * Checks if parameters is a ParameterDefinition array.
+     * 
+     * @param parameters The ParameterDefinition array to check.
+     * @return True if it is a valid ParameterDefinition array, else false.
+     */
+    private validParameterDefinitionArray(parameters: ParameterDefinition[]): boolean {
+
+        // Check that parameters is an array.
+        if (parameters instanceof Array) {
+            // Then make sure each item in the array is a ParameterDefinition.
+            for (let parameter of parameters) {
+                if (!(parameter instanceof ParameterDefinition)) {
+                    return false;
+                }
+            }
+        } else {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Checks is a given event is valid.
+     * 
+     * @param event The PublisherEvent to check.
+     */
+    private performValidPublisherEventCheck(event: PublisherEvent): void {
+
+        // Check that name is a string and it has at least 1 character.
+        if (typeof event.name !== `string` || event.name.length <= 0) {
+            throw new Error(`Expected the event name to be a string with at least 1 character.`);
+        }
+
+        // Don't need to check that parameters is a ParameterDefinition array.
+        // This was done in the constructor.
+
+        // Check the parameters are in a valid order.
+        if (!this.validParameterOrder(event.parameters)) {
+            throw new Error(`A required parameter cannot follow an optional parameter.`);
+        }
+
+        // Check that description is a string.
+        if (typeof event.description !== `string`) {
+            throw new Error(`Expected description of event ${event.name} to be a string.`);
+        }
+    }
+
 }
 
 
@@ -121,7 +265,7 @@ class Publisher {
     /**
      * A registry of all the events.
      */
-    private registeredEvents: IEvent[] = [];
+    private registeredEvents: PublisherEvent[] = [];
 
 
     /**
@@ -133,7 +277,7 @@ class Publisher {
     private eventIndex(eventName: string): number {
 
         // tslint:disable-next-line
-        for (let i = 0, event: IEvent; event = this.registeredEvents[i]; i = i + 1) {
+        for (let i = 0, event: PublisherEvent; event = this.registeredEvents[i]; i = i + 1) {
             if (event.name === eventName) {
                 return i;
             }
@@ -149,7 +293,7 @@ class Publisher {
      * @param eventName The name of the event.
      * @return The event.
      */
-    public getEvent(eventName: string): IEvent {
+    public getEvent(eventName: string): PublisherEvent {
         if (!eventName) {
             throw new Error(`Expected an event name.`);
         }
@@ -160,15 +304,12 @@ class Publisher {
         if (eventIndex > -1) {
             let event = this.registeredEvents[eventIndex];
 
-            return {
-                description: event.description,
-                handlers: this.subscriptions[eventName],
-                name: event.name,
-                parameters: event.parameters,
-                registrant: event.registrant,
-            };
+            // Set the current handlers.
+            event.handlers = this.subscriptions[eventName] || [];
+
+            return event;
         } else {
-            throw new Error(`Event ${eventName} is unregistered.`);
+            throw new Error(`Event ${eventName} is not registered. Cannot get an event that isn't registered.`);
         }
     }
 
@@ -178,8 +319,8 @@ class Publisher {
      * 
      * @return All registered events.
      */
-    public getAllEvents(): IEvent[] {
-        let events: IEvent[] = [];
+    public getAllEvents(): PublisherEvent[] {
+        let events: PublisherEvent[] = [];
 
         for (let event of this.registeredEvents) {
             events.push(this.getEvent(event.name));
@@ -217,7 +358,7 @@ class Publisher {
      * @param eventName The name of the event.
      * @return The parameters of an event.
      */
-    public getEventParameters(eventName: string): any {
+    public getEventParameters(eventName: string): ParameterDefinition[] {
         return this.getEvent(eventName).parameters;
     }
 
@@ -257,10 +398,11 @@ class Publisher {
      * @param description A description of the event.
      * @param registrant The object that registered the event.
      */
-    public register(eventName: string, parameters?: any[], description?: string, registrant?: any): void {
+    public register(eventName: string,
+        parameters?: any[], description?: string, registrant?: any): void {
         // Check the correct parameters were given.
-        if (!eventName || !parameters) {
-            throw new Error(`Expected at least an event name and array of parameters in order to register an event.`);
+        if (!eventName || eventName.length <= 0) {
+            throw new Error(`Expected an event name with at least 1 character in order to register an event.`);
         }
 
         // Check if the event is already registered
@@ -268,12 +410,7 @@ class Publisher {
             throw new Error(`Event ${eventName} is already registered.`);
         }
 
-        let newEvent: IEvent = {
-            description: description,
-            name: eventName,
-            parameters: parameters,
-            registrant: registrant,
-        };
+        let newEvent: PublisherEvent = new PublisherEvent(eventName, parameters, description, registrant);
 
         this.registeredEvents.push(newEvent);
     }
@@ -301,7 +438,7 @@ class Publisher {
             this.registeredEvents.splice(eventIndex, 1);
 
         } else {
-            throw new Error(`Event ${eventName} is unregistered.`);
+            throw new Error(`Event ${eventName} is not registered. Cannot deregister and event that isn't registered.`);
         }
     }
 
@@ -329,7 +466,8 @@ class Publisher {
         }
 
         if (!this.isRegistered(eventName)) {
-            throw new Error(`Event ${eventName} is unregistered.`);
+            throw new Error(`Event ${eventName} is not registered. ` +
+                `Cannot subscribe to an event that isn't registered.`);
         }
 
         if (!handler) {
@@ -377,7 +515,8 @@ class Publisher {
         }
 
         if (!this.isRegistered(eventName)) {
-            throw new Error(`Event ${eventName} is unregistered.`);
+            throw new Error(`Event ${eventName} is not registered. ` +
+                `Cannot unsubscribe from an event that isn't registered.`);
         }
 
         // If the event doesn't exist, return

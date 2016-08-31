@@ -1,26 +1,42 @@
 // =======================================================
 // Registering events
 // =======================================================
-publisher.register("A", [], "Just a plain event.", this);
+/**
+ * Register an event with no parameters.
+ */
+publisher.register("A");
+publisher.register("a");
+/**
+ * Register an event where the handler takes in two parameters.
+ * e.g. function(x: number, y: number) { ... };
+ */
 publisher.register("B", [
     {
-        description: "",
         name: "x",
         type: "number",
     },
     {
-        description: "",
         name: "y",
         type: "number",
     },
-], "An event with two parameters.", this);
+]);
+/**
+ * Register an event where the handler takes in one parameter.
+ * The event has a description, and the event has a registrant.
+ */
 publisher.register("C", [
     {
-        description: "",
+        description: "This is a description of the text parameter.",
         name: "text",
+        optional: true,
         type: "string",
     },
-], "An event with one parameter.", this);
+], "This is a description of event C.", this);
+// -------------------------------------------------------
+// =======================================================
+// Deregister an event.
+// =======================================================
+publisher.deregister("a");
 // -------------------------------------------------------
 // =======================================================
 // Subscribing to events
@@ -96,6 +112,29 @@ setTimeout(function () {
 // =======================================================
 // Getting events details
 // =======================================================
-console.log(publisher.getEvent("B"));
+/**
+ * Getting all registered events.
+ * This includes events with no handlers.
+ */
 console.log(publisher.getAllEvents());
+/**
+ * Getting a specific event.
+ */
+console.log(publisher.getEvent("C"));
+/**
+ * Getting a specific events parameters.
+ */
+console.log(publisher.getEventParameters("C"));
+/**
+ * Getting a specific events handlers.
+ */
+console.log(publisher.getEventHandlers("C"));
+/**
+ * Getting a specific events description.
+ */
+console.log(publisher.getEventDescription("C"));
+/**
+ * Getting a specific events registrant.
+ */
+console.log(publisher.getEventRegistrant("C"));
 // -------------------------------------------------------
