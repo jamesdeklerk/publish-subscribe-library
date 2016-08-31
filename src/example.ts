@@ -19,6 +19,7 @@ publisher.register(`B`, [
     },
     {
         name: `y`,
+        optional: true,
         type: `number`,
     },
 ]);
@@ -101,7 +102,7 @@ publisher.publish(`A`);
 /**
  * Publishing an event with parameters.
  */
-publisher.publish(`B`, 5, 2);
+publisher.publish(`B`, 5);
 
 /**
  * Remove a specific handler from an event.

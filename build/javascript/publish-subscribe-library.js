@@ -205,11 +205,11 @@ var PublisherEvent = (function () {
         }
     };
     /**
-     * Checks if the given handlers arguments match those defined for this event.
+     * Checks if the given handlers arguments match the parameters defined for this event.
      *
      * @param args The arguments to check.
      */
-    PublisherEvent.prototype.checkHandlersArgumentsMatchGiven = function () {
+    PublisherEvent.prototype.checkHandlersArgumentsMatchParametersDefined = function () {
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
             args[_i - 0] = arguments[_i];
@@ -217,9 +217,24 @@ var PublisherEvent = (function () {
         // For each parameter defined
         // tslint:disable-next-line
         for (var i = 0, parameter = void 0; parameter = this.parameters[i]; i = i + 1) {
+            // Check if the argument is of the correct type.
             if (typeof args[i] !== parameter.type) {
-                throw new Error(("The handler parameters given don't match those defined for event " + this.name + ". ") +
-                    ("Expected argument " + i + " to be of type \"" + parameter.type + "\" but found type \"" + typeof args[i] + "\"."));
+                // If it's not of the correct type and it's a required parameter,
+                // throw an error.
+                if (!parameter.optional) {
+                    throw new Error("The handler parameters given don't match those defined for " +
+                        ("event " + this.name + ". Expected argument " + i + " to be of type \"" + parameter.type + "\" ") +
+                        ("but found type \"" + typeof args[i] + "\"."));
+                }
+                else {
+                    // If it's not of the correct type but it's an optional parameter,
+                    // it must be undefined.
+                    if (!(typeof args[i] === "undefined")) {
+                        throw new Error("The handler parameters given don't match those defined for " +
+                            ("event " + this.name + ". Expected argument " + i + " to be of type \"" + parameter.type + "\" ") +
+                            ("but found type \"" + typeof args[i] + "\"."));
+                    }
+                }
             }
         }
     };
@@ -502,7 +517,7 @@ var Publisher = (function () {
             // Check if each of the relevant event handlers arguments are valid.
             // tslint:disable-next-line
             for (var i = 0, handler = void 0; handler = eventHandlers[i]; i = i + 1) {
-                event_4.checkHandlersArgumentsMatchGiven.apply(event_4, args);
+                event_4.checkHandlersArgumentsMatchParametersDefined.apply(event_4, args);
             }
         }
         // Execute each of the relevant event handlers
