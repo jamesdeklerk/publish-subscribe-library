@@ -1,6 +1,6 @@
 var ParameterDefinition = (function () {
     /**
-     * Creates a new ParameterDefinition.
+     * Creates a new instance of ParameterDefinition.
      * It also makes sure it's a valid ParameterDefinition.
      *
      * @param name The name of the parameter.
@@ -68,7 +68,7 @@ var ParameterDefinition = (function () {
 }());
 var PublisherEvent = (function () {
     /**
-     * Creates a new PublisherEvent.
+     * Creates a new instance of PublisherEvent.
      *
      * @param eventName The name of the event.
      * @param parameters An array of ParameterDefinition objects. This defines each
@@ -204,6 +204,25 @@ var PublisherEvent = (function () {
             throw new Error("Expected description of event " + event.name + " to be a string.");
         }
     };
+    /**
+     * Checks if the given handlers arguments match those defined for this event.
+     *
+     * @param args The arguments to check.
+     */
+    PublisherEvent.prototype.checkHandlersArgumentsMatchGiven = function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i - 0] = arguments[_i];
+        }
+        // For each parameter defined
+        // tslint:disable-next-line
+        for (var i = 0, parameter = void 0; parameter = this.parameters[i]; i = i + 1) {
+            if (typeof args[i] !== parameter.type) {
+                throw new Error(("The handler parameters given don't match those defined for event " + this.name + ". ") +
+                    ("Expected argument " + i + " to be of type \"" + parameter.type + "\" but found type \"" + typeof args[i] + "\"."));
+            }
+        }
+    };
     return PublisherEvent;
 }());
 /**
@@ -211,7 +230,16 @@ var PublisherEvent = (function () {
  * Uses the publish–subscribe pattern @see https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern
  */
 var Publisher = (function () {
-    function Publisher() {
+    /**
+     * Creates a new instance of Publisher.
+     *
+     * @param checkHandlerParametersOnPublish Specifies whether or not to check an event handlers
+     * parameters when publishing an event.
+     * Suggestion:
+     * checkHandlerParametersOnPublish = true for development.
+     * checkHandlerParametersOnPublish = false for production.
+     */
+    function Publisher(checkHandlerParametersOnPublish) {
         /**
          * Holds key-value pairs of events and the associated handlers.
          * Key: The event name
@@ -231,6 +259,12 @@ var Publisher = (function () {
          * A registry of all the events.
          */
         this.registeredEvents = [];
+        if (checkHandlerParametersOnPublish) {
+            this.checkHandlerParametersOnPublish = true;
+        }
+        else {
+            this.checkHandlerParametersOnPublish = false;
+        }
     }
     /**
      * Gets the index of an event in registeredEvents.
@@ -461,6 +495,16 @@ var Publisher = (function () {
             return false;
         }
         var eventHandlers = this.subscriptions[eventName];
+        // Determine if the handlers parameters should be checked
+        if (this.checkHandlerParametersOnPublish) {
+            // Get the event.
+            var event_4 = this.getEvent(eventName);
+            // Check if each of the relevant event handlers arguments are valid.
+            // tslint:disable-next-line
+            for (var i = 0, handler = void 0; handler = eventHandlers[i]; i = i + 1) {
+                event_4.checkHandlersArgumentsMatchGiven.apply(event_4, args);
+            }
+        }
         // Execute each of the relevant event handlers
         // tslint:disable-next-line
         for (var i = 0, handler = void 0; handler = eventHandlers[i]; i = i + 1) {
@@ -474,4 +518,4 @@ var Publisher = (function () {
  * Globally accessible publisher object.
  */
 // tslint:disable-next-line
-var publisher = new Publisher();
+var publisher = new Publisher(true);

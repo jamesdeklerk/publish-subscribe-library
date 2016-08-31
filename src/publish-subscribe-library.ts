@@ -8,8 +8,9 @@ class ParameterDefinition {
     public optional: boolean;
     public description: string;
 
+
     /**
-     * Creates a new ParameterDefinition.
+     * Creates a new instance of ParameterDefinition.
      * It also makes sure it's a valid ParameterDefinition.
      * 
      * @param name The name of the parameter.
@@ -31,6 +32,7 @@ class ParameterDefinition {
         this.performValidParameterDefinitionCheck(this);
     }
 
+
     /**
      * Checks is a given type is a valid type.
      * 
@@ -46,6 +48,7 @@ class ParameterDefinition {
 
         return false;
     }
+
 
     /**
      * Checks is a given parameter definition is valid.
@@ -75,7 +78,10 @@ class ParameterDefinition {
             throw new Error(`Expected description of parameter ${parameter.name} to be a string.`);
         }
     }
+
+
 }
+
 
 class PublisherEvent {
     public name: string;
@@ -87,8 +93,9 @@ class PublisherEvent {
      */
     public handlers: Function[] = [];
 
+
     /**
-     * Creates a new PublisherEvent.
+     * Creates a new instance of PublisherEvent.
      * 
      * @param eventName The name of the event.
      * @param parameters An array of ParameterDefinition objects. This defines each 
@@ -125,12 +132,13 @@ class PublisherEvent {
         this.parameters = parameters || [];
         // If this.parameters is not a ParameterDefinition array, try convert it to one.
         if (!this.validParameterDefinitionArray(parameters)) {
-            this.parameters = this.convertToParameterDefinitionArray(this.parameters)
+            this.parameters = this.convertToParameterDefinitionArray(this.parameters);
         }
 
         // Make sure this is a valid publisher event.
         this.performValidPublisherEventCheck(this);
     }
+
 
     /**
      * Converts parameters to a ParameterDefinition array.
@@ -161,6 +169,7 @@ class PublisherEvent {
         return parameters;
     }
 
+
     /**
      * Checks is the given parameters are in a valid order.
      * A required parameter cannot follow an optional parameter.
@@ -189,6 +198,7 @@ class PublisherEvent {
         return true;
     }
 
+
     /**
      * Checks if parameters is a ParameterDefinition array.
      * 
@@ -211,6 +221,7 @@ class PublisherEvent {
 
         return true;
     }
+
 
     /**
      * Checks is a given event is valid.
@@ -237,6 +248,25 @@ class PublisherEvent {
             throw new Error(`Expected description of event ${event.name} to be a string.`);
         }
     }
+
+
+    /**
+     * Checks if the given handlers arguments match those defined for this event.
+     * 
+     * @param args The arguments to check.
+     */
+    public checkHandlersArgumentsMatchGiven(...args: any[]): void {
+
+        // For each parameter defined
+        // tslint:disable-next-line
+        for (let i = 0, parameter: ParameterDefinition; parameter = this.parameters[i]; i = i + 1) {
+            if (typeof args[i] !== parameter.type) {
+                throw new Error(`The handler parameters given don't match those defined for event ${this.name}. ` +
+                `Expected argument ${i} to be of type "${parameter.type}" but found type "${typeof args[i]}".`);
+            }
+        }
+    }
+
 
 }
 
@@ -266,6 +296,25 @@ class Publisher {
      * A registry of all the events.
      */
     private registeredEvents: PublisherEvent[] = [];
+    private checkHandlerParametersOnPublish: boolean;
+
+
+    /**
+     * Creates a new instance of Publisher.
+     * 
+     * @param checkHandlerParametersOnPublish Specifies whether or not to check an event handlers 
+     * parameters when publishing an event.
+     * Suggestion:
+     * checkHandlerParametersOnPublish = true for development.
+     * checkHandlerParametersOnPublish = false for production.
+     */
+    constructor(checkHandlerParametersOnPublish?: boolean) {
+        if (checkHandlerParametersOnPublish) {
+            this.checkHandlerParametersOnPublish = true;
+        } else {
+            this.checkHandlerParametersOnPublish = false;
+        }
+    }
 
 
     /**
@@ -422,6 +471,7 @@ class Publisher {
      * @param eventName The name of the event to deregister.
      */
     public deregister(eventName: string): void {
+
         if (!eventName) {
             throw new Error(`Expected an event name to deregister.`);
         }
@@ -568,6 +618,19 @@ class Publisher {
 
         let eventHandlers: Function[] = this.subscriptions[eventName];
 
+        // Determine if the handlers parameters should be checked
+        if (this.checkHandlerParametersOnPublish) {
+
+            // Get the event.
+            let event = this.getEvent(eventName);
+
+            // Check if each of the relevant event handlers arguments are valid.
+            // tslint:disable-next-line
+            for (let i = 0, handler: Function; handler = eventHandlers[i]; i = i + 1) {
+                event.checkHandlersArgumentsMatchGiven(...args);
+            }
+        }
+
         // Execute each of the relevant event handlers
         // tslint:disable-next-line
         for (let i = 0, handler: Function; handler = eventHandlers[i]; i = i + 1) {
@@ -583,4 +646,4 @@ class Publisher {
  * Globally accessible publisher object.
  */
 // tslint:disable-next-line
-let publisher = new Publisher();
+let publisher = new Publisher(true);
