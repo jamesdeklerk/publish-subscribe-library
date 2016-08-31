@@ -69,7 +69,7 @@ publisher.subscribe("C", function (text) {
 var eventAHandler4 = publisher.subscribe("A", function () {
     console.log("Event A: Event Handler 4.");
 });
-var eventAHandler5 = publisher.subscribe("A", function () {
+var eventAHandler5 = publisher.subscribe("A", function (a, b, c) {
     console.log("Event A: Event Handler 5.");
 });
 // -------------------------------------------------------

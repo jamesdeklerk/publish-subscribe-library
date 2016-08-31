@@ -447,6 +447,23 @@ var Publisher = (function () {
         if (!handler) {
             throw new Error("Expected an event handler.");
         }
+        // Check that the event handlers parameters cater for those defined.
+        var event = this.getEvent(eventName);
+        var requiredParameterCount = 0;
+        for (var _i = 0, _a = event.parameters; _i < _a.length; _i++) {
+            var parameter = _a[_i];
+            if (!parameter.optional) {
+                requiredParameterCount = requiredParameterCount + 1;
+            }
+            else {
+                // When we find the first optional parameter, stop counting.
+                break;
+            }
+        }
+        if (requiredParameterCount > handler.length) {
+            throw new Error(("The event handler for event " + eventName + " does not cater for the required paramters. ") +
+                ("At least " + requiredParameterCount + " expected " + handler.length + " found."));
+        }
         // If the event doesn't exist, create an array for the events
         if (!this.subscriptions.hasOwnProperty(eventName)) {
             this.subscriptions[eventName] = [];

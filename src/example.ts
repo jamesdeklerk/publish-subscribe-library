@@ -82,7 +82,7 @@ publisher.subscribe(`C`, function (text: string) {
 let eventAHandler4 = publisher.subscribe(`A`, function () {
     console.log(`Event A: Event Handler 4.`);
 });
-let eventAHandler5 = publisher.subscribe(`A`, function () {
+let eventAHandler5 = publisher.subscribe(`A`, function (a, b, c) {
     console.log(`Event A: Event Handler 5.`);
 });
 
