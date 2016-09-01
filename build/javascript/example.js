@@ -17,6 +17,10 @@ publisher.register("B", [
     },
     {
         name: "y",
+        type: "number",
+    },
+    {
+        name: "z",
         optional: true,
         type: "number",
     },
@@ -57,8 +61,8 @@ publisher.subscribe("A", function () {
 /**
  * Passing parameters.
  */
-publisher.subscribe("B", function (x, y) {
-    console.log("Event B: x=" + x + "; y=" + y + "; x*y=" + x * y + ";");
+publisher.subscribe("B", function (x, y, z) {
+    console.log("Event B: x=" + x + "; y=" + y + "; x*y=" + x * y * (z ? z : 1) + ";");
 });
 publisher.subscribe("C", function (text) {
     console.log("Event C: " + text);
@@ -69,7 +73,7 @@ publisher.subscribe("C", function (text) {
 var eventAHandler4 = publisher.subscribe("A", function () {
     console.log("Event A: Event Handler 4.");
 });
-var eventAHandler5 = publisher.subscribe("A", function (a, b, c) {
+var eventAHandler5 = publisher.subscribe("A", function () {
     console.log("Event A: Event Handler 5.");
 });
 // -------------------------------------------------------
@@ -84,7 +88,7 @@ publisher.publish("A");
 /**
  * Publishing an event with parameters.
  */
-publisher.publish("B", 5);
+publisher.publish("B", 5, 6, 9);
 /**
  * Remove a specific handler from an event.
  */

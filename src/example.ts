@@ -19,6 +19,10 @@ publisher.register(`B`, [
     },
     {
         name: `y`,
+        type: `number`,
+    },
+    {
+        name: `z`,
         optional: true,
         type: `number`,
     },
@@ -69,8 +73,8 @@ publisher.subscribe(`A`, function () {
 /**
  * Passing parameters.
  */
-publisher.subscribe(`B`, function (x: number, y: number) {
-    console.log(`Event B: x=${x}; y=${y}; x*y=${x * y};`);
+publisher.subscribe(`B`, function (x: number, y: number, z: number) {
+    console.log(`Event B: x=${x}; y=${y}; x*y=${x * y * (z ? z : 1)};`);
 });
 publisher.subscribe(`C`, function (text: string) {
     console.log(`Event C: ${text}`);
@@ -82,7 +86,7 @@ publisher.subscribe(`C`, function (text: string) {
 let eventAHandler4 = publisher.subscribe(`A`, function () {
     console.log(`Event A: Event Handler 4.`);
 });
-let eventAHandler5 = publisher.subscribe(`A`, function (a, b, c) {
+let eventAHandler5 = publisher.subscribe(`A`, function () {
     console.log(`Event A: Event Handler 5.`);
 });
 
@@ -102,7 +106,7 @@ publisher.publish(`A`);
 /**
  * Publishing an event with parameters.
  */
-publisher.publish(`B`, 5);
+publisher.publish(`B`, 5, 6, 9);
 
 /**
  * Remove a specific handler from an event.
