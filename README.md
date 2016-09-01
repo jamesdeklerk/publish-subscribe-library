@@ -10,7 +10,17 @@ src/example.ts
 **JavaScript Example**<br />
 build/javascript/example.js
 
-## Getting Started (using TypeScript)
+## Getting Started - using JavaScript
+
+Two versions of the compiled JavaScript publish-subscribe library are available.<br />
+
+**Normal version**<br />
+build/javascript/publish-subscribe-library.js
+
+**Minified version**<br />
+build/javascript/publish-subscribe-library.min.js
+
+## Getting Started - using TypeScript
 
 *This assumes the TypeScript compiler is installed.*<br />
 
@@ -26,7 +36,7 @@ gulp
 
 ## API Reference
 
-To be added.
+See examples.
 
 ## Contributors
 
