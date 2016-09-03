@@ -104,9 +104,9 @@ var PublisherEvent = (function () {
         this.name = eventName;
         this.description = description || "";
         this.registrant = registrant;
-        this.parameters = parameters || [];
+        this.parameters = (parameters || []);
         // If this.parameters is not a ParameterDefinition array, try convert it to one.
-        if (!this.validParameterDefinitionArray(parameters)) {
+        if (!this.validParameterDefinitionArray(this.parameters)) {
             this.parameters = this.convertToParameterDefinitionArray(this.parameters);
         }
         // Make sure this is a valid publisher event.
