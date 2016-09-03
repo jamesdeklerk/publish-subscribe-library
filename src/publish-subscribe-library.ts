@@ -5,7 +5,7 @@ interface IParameterDefinition {
     description?: string;
 }
 
-class ParameterDefinition {
+class ParameterDefinition implements IParameterDefinition {
     /**
      * An array of the valid JavaScript data types.
      */
