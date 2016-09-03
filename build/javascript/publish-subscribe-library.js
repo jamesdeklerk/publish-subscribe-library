@@ -274,13 +274,13 @@ var Publisher = (function () {
     /**
      * Creates a new instance of Publisher.
      *
-     * @param checkHandlerParametersOnPublish Specifies whether or not to check an event handlers
-     * parameters when publishing an event.
+     * @param checkEventAndArgumentsOnPublish Specifies whether or not - when publishing an event -
+     * to check that the event is registered and the associated arguments are valid.
      * Suggestion:
-     * checkHandlerParametersOnPublish = true for development.
-     * checkHandlerParametersOnPublish = false for production.
+     * checkEventAndArgumentsOnPublish = true for development.
+     * checkEventAndArgumentsOnPublish = false for production.
      */
-    function Publisher(checkHandlerParametersOnPublish) {
+    function Publisher(checkEventAndArgumentsOnPublish) {
         /**
          * Holds key-value pairs of events and the associated handlers.
          * Key: The event name
@@ -300,11 +300,11 @@ var Publisher = (function () {
          * A registry of all the events.
          */
         this.registeredEvents = [];
-        if (checkHandlerParametersOnPublish) {
-            this.checkHandlerParametersOnPublish = true;
+        if (checkEventAndArgumentsOnPublish) {
+            this.checkEventAndArgumentsOnPublish = true;
         }
         else {
-            this.checkHandlerParametersOnPublish = false;
+            this.checkEventAndArgumentsOnPublish = false;
         }
     }
     /**
@@ -521,7 +521,7 @@ var Publisher = (function () {
             throw new Error(("Event " + eventName + " is not registered. ") +
                 "Cannot unsubscribe from an event that isn't registered.");
         }
-        // If the event doesn't exist, return
+        // If the event has no subscribers, return false;
         if (!this.subscriptions.hasOwnProperty(eventName)) {
             return false;
         }
@@ -549,7 +549,6 @@ var Publisher = (function () {
      *
      * @param eventName The name of the event.
      * @param args The arguments to be passed through to the events handler(s).
-     * @return True if successfully published, false if not.
      */
     Publisher.prototype.publish = function (eventName) {
         var args = [];
@@ -559,14 +558,10 @@ var Publisher = (function () {
         if (!eventName) {
             throw new Error("Expected an event name to publish.");
         }
-        // If the event doesn't exist, return false
-        // The property wouldn't exist if the array was empty
-        if (!this.subscriptions.hasOwnProperty(eventName)) {
-            return false;
-        }
-        var eventHandlers = this.subscriptions[eventName];
-        // Determine if the handlers parameters should be checked
-        if (this.checkHandlerParametersOnPublish) {
+        // Get an array of the event's handlers.
+        var eventHandlers = this.subscriptions[eventName] || [];
+        // Determine if the handlers parameters should be checked.
+        if (this.checkEventAndArgumentsOnPublish) {
             // Get the event.
             var event_4 = this.getEvent(eventName);
             // Check if each of the relevant event handlers arguments are valid.
@@ -580,7 +575,6 @@ var Publisher = (function () {
         for (var i = 0, handler = void 0; handler = eventHandlers[i]; i = i + 1) {
             handler.apply(void 0, args);
         }
-        return true;
     };
     return Publisher;
 }());
