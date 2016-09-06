@@ -608,8 +608,7 @@ class Publisher {
             }
 
             throw new Error(`Expected (${parameterString}) parameters for the event ${eventName} handlers. ` +
-                `The event handler does not cater for the required paramters. ` +
-                `At least ${requiredParameterCount} expected, ${handler.length} found.`);
+                `Make sure the handlers cater for the correct parameters and their corresponding types.`);
         }
 
         // If the event doesn't exist, create an array for the events
