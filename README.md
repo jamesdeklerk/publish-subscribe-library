@@ -1,4 +1,4 @@
-## JavaScript publish-subscribe library
+## High performance JavaScript publish-subscribe library
 
 This is a high performance JavaScript implementation of the [publish-subscribe](https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern) pattern.
 
